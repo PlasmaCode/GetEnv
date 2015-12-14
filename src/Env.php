@@ -26,7 +26,9 @@ class Env
     {
         $regex = '/(\w+\s=\s[\'"]\w+[\'"])/';
         
-        preg_match_all($regex, $this->fileContents, $matches);
+        if(!preg_match_all($regex, $this->fileContents, $matches)) {
+            return false;
+        }
         
         foreach ($matches[1] as $match) {
             
@@ -42,6 +44,8 @@ class Env
             $_SERVER[$match[0]] = $match[1];
             
         }
+        
+        return true;
     }
     
     private function fileContents()
