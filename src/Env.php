@@ -1,71 +1,74 @@
 <?php
 namespace PlasmaCode\GetEnv;
+use Exception;
 
 class Env
 {
-    private $filePath;
-    private $fileContents;
-    private $error;
     
     public function __construct($filePath)
     {
-        $this->filePath = $filePath;
-        
-        if($this->fileContents() !== true) {
-            trigger_error($this->error('fileContents'), E_USER_ERROR);
+        if($this->validateFilePath($filePath) === false) {
+            throw new Exception('Failed validating file path');
         }
         
-        if($this->setAllEnv() !== true) {
-            trigger_error($this->error('setAllEnv'), E_USER_ERROR);
+        $envContent = $this->getEnvContent($filePath);
+        
+        if($envContent === false) {
+            throw new Exception('Failed parsing the .env file, settings are badly formatted');
         }
         
-        return true;
+        $this->setEnvVars($envContent);
     }
     
-    private function setAllEnv()
+    private function setEnvVars(array $envContent)
     {
-        $regex = '/(\w+\s=\s[\'"]\w+[\'"])/';
         
-        if(!preg_match_all($regex, $this->fileContents, $matches)) {
-            return false;
-        }
-        
-        foreach ($matches[1] as $match) {
+        foreach ($envContent as $envValue) {
             
             //format the matches
-            $matchNoSpace = $match = str_replace(' = ', '=', $match);
-            $match = str_replace('"', '', $match);
-            $match = str_replace("'", "", $match);
-            $match = explode('=', $match);
+            $noSpace = $envValue = str_replace(' = ', '=', $envValue);
+            $envValue = str_replace('"', '', $envValue);
+            $envValue = str_replace("'", "", $envValue);
+            $envValue = explode('=', $envValue);
+            
+            $setting = $envValue[0];
+            $value = $envValue[1];
 
             //set enviromental variables
-            putenv($matchNoSpace);
-            $_ENV[$match[0]] = $match[1];
-            $_SERVER[$match[0]] = $match[1];
+            putenv($noSpace);
+            $_ENV[$setting] = $value;
+            $_SERVER[$setting] = $value;
             
         }
-        
-        return true;
     }
     
-    private function fileContents()
+    //checks to make sure the file path is legit
+    private function validateFilePath($filePath)
     {
-        if(!is_readable($this->filePath) && strtolower(substr($this->filePath, -4)) != '.env') {
+ 
+        //last 4 characters to get extension of file path
+        $filePathExt = substr($filePath, -4);
+        if(!is_readable($filePath) || !file_exists($filePath) || ($filePathExt != '.env' && $filePathExt != '.ENV')) {
             return false;
         }
         
-        $fileContents = file_get_contents($this->filePath);
-        $this->fileContents = $fileContents;
         return true;
     }
     
-    private function error($methodName)
-    {
-        switch($methodName) {
-            case 'fileContents':
-                return 'The file path '.$this->filePath.' is not a correct .env file path.';
-            case 'setAllEnv':
-                return 'Incorrect env syntax at file path '.$this->filePath;
+    private function getEnvContent($filePath)
+    {    
+        $fileContents = file_get_contents($filePath);
+        
+        //get all env configurations from file contents
+        $regex = '/(\w+\s*=\s*[\'"]\w+[\'"])/';
+        if(preg_match_all($regex, $fileContents, $matches) === false) {
+            return false;
         }
+        
+        if($matches[1] == null) {
+            return false;
+        }
+        
+        return $matches[1];
     }
 }
