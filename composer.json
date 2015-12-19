@@ -1,0 +1,15 @@
+{
+    "name": "plasmacode/getenv",
+    "require": {
+        "php" : "~5.4"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~4.0"
+    },
+    "autoload": {
+        "psr-4": { "PlasmaCode\\GetEnv\\" : "src" }
+    },
+    "autoload-dev": {
+        "psr-4": { "PlasmaCode\\GetEnv\\Testing\\" : "Testing" }
+    }
+}
