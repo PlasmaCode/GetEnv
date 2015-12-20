@@ -4,6 +4,7 @@ use Exception;
 
 class Env
 {
+    public $envArray;
     
     public function __construct($filePath)
     {
@@ -22,7 +23,7 @@ class Env
     
     private function setEnvVars(array $envContent)
     {
-        
+        $this->envArray = $envContent;
         foreach ($envContent as $envValue) {
             
             //format the matches
