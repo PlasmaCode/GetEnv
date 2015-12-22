@@ -17,3 +17,4 @@ You may now access the declared env setting like so:
     getenv('SETTING');
     $_ENV['SETTING'];
     $_SERVER['SETTING'];
+    $env->__get('SETTING');
