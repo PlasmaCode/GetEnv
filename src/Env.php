@@ -4,7 +4,7 @@ use Exception;
 
 class Env
 {
-    public $envArray;
+    public $envArray = array();
     
     public function __construct($filePath)
     {
@@ -21,9 +21,18 @@ class Env
         $this->setEnvVars($envContent);
     }
     
+    
+    public function __get($setting)
+    {
+        if(array_key_exists($setting, $this->envArray) === false) {
+            throw new Exception('Failed to get the env setting "' . $setting . '"');
+        }
+        
+        return $this->envArray[$setting];
+    }
+    
     private function setEnvVars(array $envContent)
     {
-        $this->envArray = $envContent;
         foreach ($envContent as $envValue) {
             
             //format the matches
@@ -39,6 +48,7 @@ class Env
             putenv($noSpace);
             $_ENV[$setting] = $value;
             $_SERVER[$setting] = $value;
+            $this->envArray[$setting] = $value;
             
         }
     }
@@ -61,7 +71,7 @@ class Env
         $fileContents = file_get_contents($filePath);
         
         //get all env configurations from file contents
-        $regex = '/(\w+\s*=\s*[\'"]\w+[\'"])/';
+        $regex = '/(\w+\s*=\s*[\'"][\s\w\.\,]+[\'"])/';
         if(preg_match_all($regex, $fileContents, $matches) === false) {
             return false;
         }
