@@ -73,4 +73,26 @@ class EnvTest extends \PHPUnit_Framework_TestCase
         
         $this->assertEquals($expected, count($Env->envArray));
     }
+    
+    
+    public function testEnvGetMethod()
+    {
+        $expected = 'testing, get';
+        $filePath = __DIR__ . '/../EnvFiles/test.env';
+        $Env = new Env($filePath);
+        $envSetting = $Env->__get('GET');
+        
+        $this->assertEquals($expected, $envSetting);
+    }
+    
+    public function testFailEnvGetMethod()
+    {
+        $this->setExpectedException('Exception', 'Failed to get the env setting "GETAFAIL"');
+        $expected = 0;
+        $filePath = __DIR__ . '/../EnvFiles/test.env';
+        $Env = new Env($filePath);
+        $envSetting = $Env->__get('GETAFAIL');
+        
+        $this->assertEquals($expected, count($envSetting));
+    }
 }
